@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import { FlatList, Text, View } from "react-native";
-
-import type { Booking } from "@/lib/api/bookings";
+import { Booking } from "@/lib/types/bookings";
 import { useBookingsQuery } from "@/lib/hooks/bookings/use-bookings-query";
 import { PressableOpacity } from "@/components/ui/pressable-opacity";
 

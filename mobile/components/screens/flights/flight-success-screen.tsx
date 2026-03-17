@@ -30,7 +30,7 @@ export default function BookingSuccessScreen() {
       </PressableOpacity>
 
       <PressableOpacity
-        onPress={() => router.replace("/home")}
+        onPress={() => router.replace("/(tabs)")}
         className="py-3"
       >
         <Text className="text-blue-600 font-medium">Back to Home</Text>

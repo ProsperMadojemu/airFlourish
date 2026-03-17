@@ -5,7 +5,7 @@ import { create } from "zustand";
 
 import { loginRequest, logoutRequest } from "@/lib/api/auth";
 import { setAuthToken } from "@/lib/api/client";
-import type { AuthUser } from "@/lib/api/auth";
+import type { AuthUser } from "@/lib/types/auth";
 
 type AuthState = {
   user: AuthUser | null;
