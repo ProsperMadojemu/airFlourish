@@ -1,22 +1,12 @@
 import { apiClient } from "@/lib/api/client";
+import {
+  CreateHotelReservationPayload,
+  Hotel,
+  HotelDetail,
+  ListHotelsParams,
+} from "@/lib/types/hotels";
 
-export type Hotel = {
-  id: number;
-  hotel_name: string;
-  price_per_night?: number;
-  currency?: string;
-  city: string;
-};
-
-export type HotelDetail = Hotel & {
-  address?: string;
-};
-
-export const listHotelsRequest = async (params: {
-  city: string;
-  checkIn: string;
-  checkOut: string;
-}) => {
+export const listHotelsRequest = async (params: ListHotelsParams) => {
   const response = await apiClient.get<Hotel[]>("hotels/hotels/", {
     params: {
       city: params.city,
@@ -34,12 +24,9 @@ export const getHotelRequest = async (hotelId: string) => {
   return response.data;
 };
 
-export const createHotelReservationRequest = async (payload: {
-  hotelId: number;
-  checkIn: string;
-  checkOut: string;
-  guests: number;
-}) => {
+export const createHotelReservationRequest = async (
+  payload: CreateHotelReservationPayload,
+) => {
   const response = await apiClient.post("hotels/hotel-reservations/", {
     hotel_id: payload.hotelId,
     check_in: payload.checkIn,

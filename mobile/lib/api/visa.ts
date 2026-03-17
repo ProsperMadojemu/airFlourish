@@ -1,11 +1,9 @@
 import { apiClient } from "@/lib/api/client";
+import { CreateVisaApplicationPayload } from "@/lib/types/visa";
 
-export const createVisaApplicationRequest = async (payload: {
-  destinationCountry: string;
-  visaType: string;
-  appointmentDate?: string;
-  visaFee: number;
-}) => {
+export const createVisaApplicationRequest = async (
+  payload: CreateVisaApplicationPayload,
+) => {
   const response = await apiClient.post("visas/visas/", {
     destination_country: payload.destinationCountry,
     visa_type: payload.visaType,
