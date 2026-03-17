@@ -1,7 +1,7 @@
 import { ActivityIndicator, Text, View } from "react-native";
 
 import { PressableOpacity } from "@/components/ui/pressable-opacity";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/lib/hooks/use-auth";
 import { useProfileQuery } from "@/lib/hooks/auth/use-profile-query";
 
 export default function TabProfileScreen() {

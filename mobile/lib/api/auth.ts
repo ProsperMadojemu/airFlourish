@@ -1,7 +1,9 @@
 import { apiClient } from "@/lib/api/client";
-import { AuthSession, AuthUser, RegisterPayload } from "@/lib/types/auth";
+import { AuthSession, User, RegisterPayload } from "@/lib/types/auth";
+import { LoginSchema } from "../validators/auth";
 
-export const loginRequest = async (email: string, password: string) => {
+export const loginRequest = async (payload: LoginSchema) => {
+  const { email, password } = payload;
   const response = await apiClient.post<AuthSession>("token/", { email, password });
   return response.data;
 };
@@ -12,7 +14,7 @@ export const registerRequest = async (payload: RegisterPayload) => {
 };
 
 export const fetchProfileRequest = async () => {
-  const response = await apiClient.get<AuthUser>("users/profile/");
+  const response = await apiClient.get<User>("users/profile/");
   return response.data;
 };
 

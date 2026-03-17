@@ -1,4 +1,4 @@
-export type AuthUser = {
+export type User = {
   email: string;
   first_name?: string;
   last_name?: string;
@@ -9,7 +9,7 @@ export type AuthUser = {
   zone?: string | null;
 };
 
-export type AuthSession = AuthUser & {
+export type AuthSession = User & {
   access: string;
   refresh?: string;
 };
