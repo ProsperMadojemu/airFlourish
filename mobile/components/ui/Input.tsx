@@ -1,6 +1,7 @@
-import { TextInput, View } from "react-native";
+import { cn } from "@/lib/utils";
+import { TextInput, type TextInputProps, View } from "react-native";
 
-interface Props {
+interface Props extends TextInputProps {
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -12,6 +13,7 @@ export default function Input({
   value,
   onChangeText,
   secureTextEntry = false,
+  ...rest
 }: Props) {
   return (
     <View className="mb-4">
@@ -20,7 +22,8 @@ export default function Input({
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
-        className="bg-gray-100 p-4 rounded-2xl text-base"
+        className={cn("bg-gray-100 p-4 rounded-2xl text-base")}
+        {...rest}
       />
     </View>
   );

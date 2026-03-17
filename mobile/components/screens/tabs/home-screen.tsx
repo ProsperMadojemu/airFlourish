@@ -21,7 +21,7 @@ export default function HomeScreen() {
 
       {/* Hotels */}
       <PressableOpacity
-        onPress={() => router.push("/hotels")}
+        onPress={() => router.push("/hotels/search")}
         className="bg-white p-5 rounded-2xl mb-4 shadow"
       >
         <View className="flex-row items-center">

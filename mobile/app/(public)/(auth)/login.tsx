@@ -1,3 +1,3 @@
-import { LoginScreen } from "@/components/screens/auth/login-screen";
+import { LoginScreen } from "@/components/screens/auth/login/login-screen";
 
 export default LoginScreen;

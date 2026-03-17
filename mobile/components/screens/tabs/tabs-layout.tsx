@@ -14,7 +14,7 @@ function CustomDrawerContent() {
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
-    router.replace("/(auth)/login");
+    router.replace("/");
   };
 
   return (

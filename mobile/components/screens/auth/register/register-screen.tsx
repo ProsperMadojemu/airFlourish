@@ -15,6 +15,7 @@ export function RegisterScreen() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
+  
   const handleRegister = async () => {
     try {
       await registerMutation.mutateAsync({
@@ -24,7 +25,7 @@ export function RegisterScreen() {
         password,
         user_type: "regular",
       });
-      router.replace("/(auth)/login");
+      router.replace("/");
     } catch (error) {
       console.log(error);
     }
@@ -57,7 +58,7 @@ export function RegisterScreen() {
           )}
         </PressableOpacity>
 
-        <PressableOpacity onPress={() => router.push("/(auth)/login")} className="mt-6">
+        <PressableOpacity onPress={() => router.push("/(public)/(auth)/login")} className="mt-6">
           <Text className="text-center text-gray-600">
             Already have an account? <Text className="text-blue-600 font-semibold">Login</Text>
           </Text>

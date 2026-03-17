@@ -1,3 +1,3 @@
-import { RegisterScreen } from "@/components/screens/auth/register-screen";
+import { RegisterScreen } from "@/components/screens/auth/register/register-screen";
 
 export default RegisterScreen;
