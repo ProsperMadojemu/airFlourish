@@ -43,112 +43,127 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    const login = useCallback(
-        async (payload: LoginSchema) => {
-            try {
-                const data = await loginRequest(payload);
+    const login = useCallback(async (payload: LoginSchema) => {
+        console.log("[AUTH] login() called", payload);
 
-                const nextAuth: StoredAuth = {
-                    isLoggedIn: true,
-                };
-                const token = data.access;
-                const refreshToken = data.refresh ?? null;
+        try {
+            const data = await loginRequest(payload);
+            console.log("[AUTH] login success response", data);
 
-                const user: User = {
-                    email: data.email,
-                    first_name: data.first_name,
-                    last_name: data.last_name,
-                    user_type: data.user_type,
-                    country: data.country ?? null,
-                    phone_number: data.phone_number ?? null,
-                    church: data.church ?? null,
-                    zone: data.zone ?? null,
-                }
+            const nextAuth: StoredAuth = {
+                isLoggedIn: true,
+            };
 
-                setStoredAuth(JSON.stringify(nextAuth));
-                setUser(user);
-                setStoredUser(JSON.stringify(user));
-                setIsLoggedIn(true);
-                setToken(token);
-                setAuthToken(token);
-                if (refreshToken) {
-                    setStoredRefreshToken(refreshToken);
-                }
-                return data;
-            } catch (error) {
-                console.error("Login error:", error);
-                throw error;
+            const token = data.access;
+            const refreshToken = data.refresh ?? null;
+
+            const user: User = {
+                email: data.email,
+                first_name: data.first_name,
+                last_name: data.last_name,
+                user_type: data.user_type,
+                country: data.country ?? null,
+                phone_number: data.phone_number ?? null,
+                church: data.church ?? null,
+                zone: data.zone ?? null,
+            };
+
+            console.log("[AUTH] setting state + storage");
+
+            setStoredAuth(JSON.stringify(nextAuth));
+            setUser(user);
+            setStoredUser(JSON.stringify(user));
+            setIsLoggedIn(true);
+            setToken(token);
+            setAuthToken(token);
+
+            if (refreshToken) {
+                console.log("[AUTH] storing refresh token");
+                setStoredRefreshToken(refreshToken);
             }
-        },
-        [
-            setStoredAuth,
-            setStoredUser,
-            setToken,
-            setStoredRefreshToken
-        ]
-    );
+
+            return data;
+        } catch (error) {
+            console.error("[AUTH] login error:", error);
+            throw error;
+        }
+    }, [setStoredAuth, setStoredUser, setToken, setStoredRefreshToken]);
 
     const refresh = useCallback(async () => {
+        console.log("[AUTH] refresh() called", { token });
+
         if (!token) {
+            console.log("[AUTH] no token → logging out");
             setIsLoggedIn(false);
             return;
         }
+
         try {
-            // const res = await backApi.get("/me", {
-            //     headers: { Authorization: `Bearer ${token}` },
-            // });
-            // setUser(res.data);
-            // setIsLoggedIn(true);
-            // setStoredAuth(JSON.stringify({ isLoggedIn: true }));
+            console.log("[AUTH] attempting refresh...");
+            // your API logic here
         } catch (err) {
-            console.warn("Re-login failed. Token may be invalid or expired.", err);
+            console.warn("[AUTH] refresh failed", err);
             setToken(null);
             setIsLoggedIn(false);
         }
-    }, [setToken, token]);
+    }, [token, setToken]);
 
     const logout = useCallback(async () => {
+        console.log("[AUTH] logout() called", { storedRefreshToken });
+
         try {
             await logoutRequest(storedRefreshToken);
+            console.log("[AUTH] logout API success");
+
             setStoredUser(null);
             setStoredAuth(null);
             setUser(null);
             setIsLoggedIn(false);
-        } catch {
-
+        } catch (err) {
+            console.warn("[AUTH] logout error", err);
         }
     }, [setStoredAuth, setStoredUser, storedRefreshToken]);
 
     useEffect(() => {
+        console.log("[AUTH] hydration effect triggered", {
+            storedUserLoading,
+            storedAuthLoading,
+            storedUser,
+            storedAuth,
+        });
+
         if (storedUserLoading || storedAuthLoading) return;
 
         try {
             if (storedUser) {
-                setUser(JSON.parse(storedUser) as User);
+                console.log("[AUTH] restoring user");
+                setUser(JSON.parse(storedUser));
             }
+
             if (storedAuth) {
-                const parsedAuth = JSON.parse(storedAuth) as StoredAuth;
+                console.log("[AUTH] restoring auth");
+                const parsedAuth = JSON.parse(storedAuth);
                 setIsLoggedIn(Boolean(parsedAuth?.isLoggedIn));
             }
         } catch (error) {
-            console.error("Failed to hydrate auth state:", error);
+            console.error("[AUTH] hydration failed", error);
             setStoredUser(null);
             setStoredAuth(null);
         } finally {
+            console.log("[AUTH] hydration complete → ready");
             setIsReady(true);
         }
-    }, [
-        storedUserLoading,
-        storedAuthLoading,
-        storedUser,
-        storedAuth,
-        setStoredAuth,
-        setStoredUser,
-    ]);
+    }, [storedUserLoading, storedAuthLoading, storedUser, storedAuth, setStoredAuth, setStoredUser]);
 
     useEffect(() => {
-        if (isReady) SplashScreen.hideAsync();
+        console.log("[AUTH] isReady changed", isReady);
+
+        if (isReady) {
+            console.log("[AUTH] hiding splash screen");
+            SplashScreen.hideAsync();
+        }
     }, [isReady]);
+    
     const value = useMemo(
         () => ({ user, isLoggedIn, isReady, login, refresh, logout }),
         [user, isLoggedIn, isReady, login, refresh, logout],

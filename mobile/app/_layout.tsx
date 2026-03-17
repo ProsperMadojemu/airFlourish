@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryProvider } from "@/components/providers/query-provider";
 // import { useAuth } from "@/lib/hooks/use-auth";
 import "../global.css"
+import { AuthProvider } from "@/components/providers/auth-provider";
 
 function AppRouter() {
   // const router = useRouter();
@@ -42,9 +43,12 @@ function AppRouter() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryProvider>
-        <AppRouter />
-      </QueryProvider>
+      <AuthProvider>
+
+        <QueryProvider>
+          <AppRouter />
+        </QueryProvider>
+      </AuthProvider>
     </GestureHandlerRootView>
   );
 }
