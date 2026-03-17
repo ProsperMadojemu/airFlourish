@@ -1,7 +1,5 @@
 import axios from "axios";
 
-import { useAuth } from "@/hooks/use-auth";
-
 export const API_BASE_URL =
   process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://192.168.0.200:8000/api/";
 
@@ -9,12 +7,12 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
 });
 
+let currentAuthToken: string | null = null;
+
 apiClient.interceptors.request.use(
   (config) => {
-    const token = useAuth.getState().token;
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (currentAuthToken) {
+      config.headers.Authorization = `Bearer ${currentAuthToken}`;
     }
 
     return config;
@@ -23,6 +21,8 @@ apiClient.interceptors.request.use(
 );
 
 export const setAuthToken = (token: string | null) => {
+  currentAuthToken = token;
+
   if (token) {
     apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
     return;

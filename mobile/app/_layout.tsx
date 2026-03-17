@@ -1,6 +1,7 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { QueryProvider } from "@/components/providers/query-provider";
 import { useAuth } from "@/hooks/use-auth";
@@ -42,8 +43,10 @@ function AppRouter() {
 
 export default function RootLayout() {
   return (
-    <QueryProvider>
-      <AppRouter />
-    </QueryProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryProvider>
+        <AppRouter />
+      </QueryProvider>
+    </GestureHandlerRootView>
   );
 }
