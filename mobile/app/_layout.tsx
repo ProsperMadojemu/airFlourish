@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { QueryProvider } from "@/components/providers/query-provider";
 import { useAuth } from "@/hooks/use-auth";
+import "../global.css"
 
 function AppRouter() {
   const router = useRouter();
