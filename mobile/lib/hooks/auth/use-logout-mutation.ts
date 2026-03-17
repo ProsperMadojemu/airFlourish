@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/hooks/use-auth";
 
 export const useLogoutMutation = () => {
-  const logout = useAuth((state) => state.logout);
+  const { logout } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
