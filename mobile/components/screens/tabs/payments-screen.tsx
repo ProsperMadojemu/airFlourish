@@ -1,6 +1,6 @@
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 
-import type { Payment } from "@/lib/api/payments";
+import type { Payment } from "@/lib/types/payments";
 import { usePaymentsQuery } from "@/lib/hooks/payments/use-payments-query";
 
 export default function TabPaymentsScreen() {

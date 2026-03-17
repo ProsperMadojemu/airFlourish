@@ -1,11 +1,11 @@
 import { apiClient } from "@/lib/api/client";
+import {
+  SearchFlightsParams,
+  SecureBookFlightPayload,
+  SecureBookFlightResponse,
+} from "@/lib/types/flights";
 
-export const searchFlightsRequest = async (params: {
-  origin: string;
-  destination: string;
-  departureDate: string;
-  returnDate?: string;
-}) => {
+export const searchFlightsRequest = async (params: SearchFlightsParams) => {
   const response = await apiClient.get("bookings/flights/search/", {
     params: {
       origin: params.origin,
@@ -18,10 +18,7 @@ export const searchFlightsRequest = async (params: {
   return response.data as any[];
 };
 
-export const secureBookFlightRequest = async (payload: {
-  flightOffer: any;
-  passenger: { firstName: string; lastName: string; dob: string };
-}) => {
+export const secureBookFlightRequest = async (payload: SecureBookFlightPayload) => {
   const departureSegment = payload.flightOffer.itineraries?.[0]?.segments?.[0];
   const arrivalSegment = payload.flightOffer.itineraries?.[0]?.segments?.slice(-1)[0];
   const returnSegment = payload.flightOffer.itineraries?.[1]?.segments?.slice(-1)[0];
@@ -48,5 +45,5 @@ export const secureBookFlightRequest = async (payload: {
     passengers: 1,
   });
 
-  return response.data as { payment_link?: string };
+  return response.data as SecureBookFlightResponse;
 };
