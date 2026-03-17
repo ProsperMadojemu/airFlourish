@@ -27,7 +27,7 @@ type StoredAuth = {
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const hydratedRef = useRef(false);
+    const clearingAuthRef = useRef(false);
     const [isReady, setIsReady] = useState(false);
     const [[storedUserLoading, storedUser], setStoredUser] = useStorageState(
         USER_STORAGE_KEY,
@@ -91,6 +91,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [setStoredAuth, setStoredUser, setToken, setStoredRefreshToken]);
 
     const clearAuthState = useCallback(() => {
+        if (clearingAuthRef.current) return;
+        clearingAuthRef.current = true;
+
         setStoredUser(null);
         setStoredAuth(null);
         setToken(null);
@@ -98,6 +101,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setIsLoggedIn(false);
         setAuthToken(null);
+
+        queueMicrotask(() => {
+            clearingAuthRef.current = false;
+        });
     }, [setStoredAuth, setStoredRefreshToken, setStoredUser, setToken]);
 
     const refresh = useCallback(async () => {
@@ -138,10 +145,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [setStoredAuth, setStoredUser, setStoredRefreshToken, setToken, storedRefreshToken]);
 
     useEffect(() => {
-        if (hydratedRef.current) return;
+        if (isReady) return;
         if (storedUserLoading || storedAuthLoading || storedTokenLoading || storedRefreshLoading) return;
-
-        hydratedRef.current = true;
 
         try {
             if (storedUser) {
@@ -160,10 +165,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error("[AUTH] hydration failed", error);
             clearAuthState();
         } finally {
-            setIsReady(true);
+            setIsReady((prev) => (prev ? prev : true));
         }
     }, [
         clearAuthState,
+        isReady,
         storedUserLoading,
         storedAuthLoading,
         storedTokenLoading,
