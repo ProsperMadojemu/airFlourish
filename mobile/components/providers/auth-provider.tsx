@@ -1,8 +1,8 @@
 
-import { loginRequest, logoutRequest } from "@/lib/api/auth";
-import { setAuthToken } from "@/lib/api/client";
+import { loginRequest, logoutRequest, refreshTokenRequest } from "@/lib/api/auth";
+import { configureAuthHandlers, setAuthToken } from "@/lib/api/client";
 import type { AuthSession, User } from "@/lib/types/auth";
-import { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AUTH_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY, TOKEN_STORAGE_KEY, USER_STORAGE_KEY } from "@/lib/constants/storage-keys";
 import { useStorageState } from "@/lib/hooks/use-storage";
 import { LoginSchema } from "@/lib/validators/auth";
@@ -27,6 +27,7 @@ type StoredAuth = {
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+    const hydratedRef = useRef(false);
     const [isReady, setIsReady] = useState(false);
     const [[storedUserLoading, storedUser], setStoredUser] = useStorageState(
         USER_STORAGE_KEY,
@@ -34,10 +35,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [[storedAuthLoading, storedAuth], setStoredAuth] = useStorageState(
         AUTH_STORAGE_KEY,
     );
-    const [[, token], setToken] = useStorageState(
+    const [[storedTokenLoading, token], setToken] = useStorageState(
         TOKEN_STORAGE_KEY, true
     );
-    const [[, storedRefreshToken], setStoredRefreshToken] = useStorageState(
+    const [[storedRefreshLoading, storedRefreshToken], setStoredRefreshToken] = useStorageState(
         REFRESH_TOKEN_STORAGE_KEY, true
     );
     const [user, setUser] = useState<User | null>(null);
@@ -89,24 +90,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, [setStoredAuth, setStoredUser, setToken, setStoredRefreshToken]);
 
-    const refresh = useCallback(async () => {
-        console.log("[AUTH] refresh() called", { token });
+    const clearAuthState = useCallback(() => {
+        setStoredUser(null);
+        setStoredAuth(null);
+        setToken(null);
+        setStoredRefreshToken(null);
+        setUser(null);
+        setIsLoggedIn(false);
+        setAuthToken(null);
+    }, [setStoredAuth, setStoredRefreshToken, setStoredUser, setToken]);
 
-        if (!token) {
-            console.log("[AUTH] no token → logging out");
-            setIsLoggedIn(false);
+    const refresh = useCallback(async () => {
+        if (!storedRefreshToken) {
+            clearAuthState();
             return;
         }
 
         try {
-            console.log("[AUTH] attempting refresh...");
-            // your API logic here
+            const data = await refreshTokenRequest(storedRefreshToken);
+            setToken(data.access);
+            setAuthToken(data.access);
+            setIsLoggedIn(true);
         } catch (err) {
             console.warn("[AUTH] refresh failed", err);
-            setToken(null);
-            setIsLoggedIn(false);
+            clearAuthState();
+            throw err;
         }
-    }, [token, setToken]);
+    }, [clearAuthState, setToken, storedRefreshToken]);
 
     const logout = useCallback(async () => {
         console.log("[AUTH] logout() called", { storedRefreshToken });
@@ -117,49 +127,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             setStoredUser(null);
             setStoredAuth(null);
+            setToken(null);
+            setStoredRefreshToken(null);
             setUser(null);
             setIsLoggedIn(false);
+            setAuthToken(null);
         } catch (err) {
             console.warn("[AUTH] logout error", err);
         }
-    }, [setStoredAuth, setStoredUser, storedRefreshToken]);
+    }, [setStoredAuth, setStoredUser, setStoredRefreshToken, setToken, storedRefreshToken]);
 
     useEffect(() => {
-        console.log("[AUTH] hydration effect triggered", {
-            storedUserLoading,
-            storedAuthLoading,
-            storedUser,
-            storedAuth,
-        });
+        if (hydratedRef.current) return;
+        if (storedUserLoading || storedAuthLoading || storedTokenLoading || storedRefreshLoading) return;
 
-        if (storedUserLoading || storedAuthLoading) return;
+        hydratedRef.current = true;
 
         try {
             if (storedUser) {
-                console.log("[AUTH] restoring user");
                 setUser(JSON.parse(storedUser));
             }
 
             if (storedAuth) {
-                console.log("[AUTH] restoring auth");
                 const parsedAuth = JSON.parse(storedAuth);
                 setIsLoggedIn(Boolean(parsedAuth?.isLoggedIn));
             }
+
+            if (token) {
+                setAuthToken(token);
+            }
         } catch (error) {
             console.error("[AUTH] hydration failed", error);
-            setStoredUser(null);
-            setStoredAuth(null);
+            clearAuthState();
         } finally {
-            console.log("[AUTH] hydration complete → ready");
             setIsReady(true);
         }
-    }, [storedUserLoading, storedAuthLoading, storedUser, storedAuth, setStoredAuth, setStoredUser]);
+    }, [
+        clearAuthState,
+        storedUserLoading,
+        storedAuthLoading,
+        storedTokenLoading,
+        storedRefreshLoading,
+        storedUser,
+        storedAuth,
+        token,
+    ]);
 
     useEffect(() => {
-        console.log("[AUTH] isReady changed", isReady);
+        configureAuthHandlers({
+            onRefreshAccessToken: async () => {
+                if (!storedRefreshToken) return null;
 
+                try {
+                    const data = await refreshTokenRequest(storedRefreshToken);
+                    setToken(data.access);
+                    setAuthToken(data.access);
+                    setIsLoggedIn(true);
+                    return data.access;
+                } catch {
+                    return null;
+                }
+            },
+            onAuthFailure: clearAuthState,
+        });
+    }, [clearAuthState, setToken, storedRefreshToken]);
+
+    useEffect(() => {
         if (isReady) {
-            console.log("[AUTH] hiding splash screen");
             SplashScreen.hideAsync();
         }
     }, [isReady]);
@@ -171,4 +205,3 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 
 }
-
