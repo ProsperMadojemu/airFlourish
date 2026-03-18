@@ -1,5 +1,4 @@
-import { PressableOpacity } from "@/components/ui/pressable-opacity";
-import { ActivityIndicator, Text, View } from "react-native";
+import { View } from "react-native";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/Input";
@@ -12,14 +11,17 @@ export function LoginScreenForm() {
     const loginMutation = useLoginMutation();
     const router = useRouter();
 
+    const login_mail = process.env.EXPO_PUBLIC_LOGIN_EMAIL
+    const login_password = process.env.EXPO_PUBLIC_LOGIN_PASSWORD
+
     const {
         reset,
         control,
         handleSubmit
     } = useForm<LoginSchema>({
         defaultValues: {
-            email: __DEV__ ? "prospermadojemu00@gmail.com" : "",
-            password: __DEV__ ? "Prosper" : "",
+            email: __DEV__ ? login_mail : "",
+            password: __DEV__ ? login_password : "",
         },
         resolver: zodResolver(loginSchema)
     })
@@ -41,6 +43,7 @@ export function LoginScreenForm() {
                     control={control}
                     render={({ field: { onChange, onBlur, value } }) => (
                         <Input
+                            editable={!loginMutation.isPending}
                             placeholder="Email"
                             onBlur={onBlur}
                             onChangeText={onChange}
@@ -53,6 +56,7 @@ export function LoginScreenForm() {
                     control={control}
                     render={({ field: { onChange, onBlur, value } }) => (
                         <Input
+                            editable={!loginMutation.isPending}
                             placeholder="Password"
                             onBlur={onBlur}
                             onChangeText={onChange}
@@ -67,13 +71,13 @@ export function LoginScreenForm() {
                 onPress={handleSubmit(onSubmit)}
                 className="rounded-2xl mt-4"
                 variant="default"
+                isLoading={loginMutation.isPending}
+                disabled={loginMutation.isPending}
             >
                 {/* {loginMutation.isPending ? (
                     <ActivityIndicator color="white" />
                 ) : ( */}
-                <Text className="text-center font-semibold w-full text-white">
-                    Login
-                </Text>
+                Login
             </Button>
 
         </View>
