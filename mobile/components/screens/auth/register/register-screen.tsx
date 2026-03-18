@@ -2,7 +2,7 @@ import { useRouter } from "expo-router";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useState } from "react";
 
-import Input from "@/components/ui/Input";
+import { Input } from "@/components/ui/Input";
 import { useRegisterMutation } from "@/lib/hooks/auth/use-register-mutation";
 import { PressableOpacity } from "@/components/ui/pressable-opacity";
 

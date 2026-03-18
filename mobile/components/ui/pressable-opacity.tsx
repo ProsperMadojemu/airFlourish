@@ -29,11 +29,11 @@ export function PressableOpacity({
       className={className}
       onPressIn={(event) => {
         progress.value = withTiming(1, { duration: 110 });
-        onPressIn?.(event);
+        onPressIn?.(event as any);
       }}
       onPressOut={(event) => {
         progress.value = withTiming(0, { duration: 140 });
-        onPressOut?.(event);
+        onPressOut?.(event as any);
       }}
       style={[style, animatedStyle]}
     >
