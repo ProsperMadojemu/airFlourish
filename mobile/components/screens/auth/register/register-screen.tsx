@@ -25,7 +25,7 @@ export function RegisterScreen() {
         password,
         user_type: "regular",
       });
-      router.replace("/");
+      router.replace("/login");
     } catch (error) {
       console.log(error);
     }
