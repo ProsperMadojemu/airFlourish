@@ -68,7 +68,7 @@ export function Button({
   return (
     <Pressable
       className={cn(
-        'flex-row items-center justify-center gap-2 border shadow-xs',
+        'flex-row items-center justify-center gap-2 shadow-xs',
         variantStyles[finalVariant],
         sizeStyles[size],
         isDisabled && 'opacity-50',
