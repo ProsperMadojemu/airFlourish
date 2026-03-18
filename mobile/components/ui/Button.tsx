@@ -1,11 +1,30 @@
 import * as React from 'react';
-import { ActivityIndicator, Pressable, Text, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View, type PressableProps } from 'react-native';
 
 import { cn } from '@/lib/utils';
-import { useThemeTokens } from '@/components/ui/theme';
 
 type ButtonVariant = 'default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'link' | 'success';
 type ButtonSize = 'default' | 'xs' | 'sm' | 'lg' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg';
+
+const variantStyles: Record<ButtonVariant, string> = {
+  default: 'bg-primary border-primary',
+  outline: 'border-border bg-background',
+  secondary: 'bg-secondary border-secondary',
+  ghost: 'bg-transparent border-transparent',
+  destructive: 'bg-destructive/10 border-destructive/20',
+  link: 'bg-transparent border-transparent px-0',
+  success: 'bg-success border-success',
+};
+
+const textVariantStyles: Record<ButtonVariant, string> = {
+  default: 'text-primary-foreground',
+  outline: 'text-foreground',
+  secondary: 'text-secondary-foreground',
+  ghost: 'text-foreground',
+  destructive: 'text-destructive',
+  link: 'text-primary underline',
+  success: 'text-white',
+};
 
 const sizeStyles: Record<ButtonSize, string> = {
   default: 'h-10 px-4 rounded-lg',
@@ -33,7 +52,6 @@ export type ButtonProps = PressableProps & {
 export function Button({
   className,
   textClassName,
-  style,
   variant = 'default',
   size = 'default',
   isLoading = false,
@@ -44,56 +62,34 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const { colors } = useThemeTokens();
   const finalVariant: ButtonVariant = isSuccess ? 'success' : variant;
   const isDisabled = disabled || isLoading;
 
-  const variantStyle = React.useMemo<StyleProp<ViewStyle>>(() => {
-    switch (finalVariant) {
-      case 'outline':
-        return { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 };
-      case 'secondary':
-        return { backgroundColor: colors.secondary, borderColor: colors.secondary, borderWidth: 1 };
-      case 'ghost':
-        return { backgroundColor: 'transparent', borderColor: 'transparent', borderWidth: 1 };
-      case 'destructive':
-        return { backgroundColor: colors.background === '#0f172a' ? '#4c1d1d' : '#fee2e2', borderColor: colors.destructive, borderWidth: 1 };
-      case 'link':
-        return { backgroundColor: 'transparent', borderColor: 'transparent', borderWidth: 0 };
-      case 'success':
-        return { backgroundColor: colors.success, borderColor: colors.success, borderWidth: 1 };
-      default:
-        return { backgroundColor: colors.primary, borderColor: colors.primary, borderWidth: 1 };
-    }
-  }, [colors, finalVariant]);
-
-  const textColor =
-    finalVariant === 'outline' || finalVariant === 'secondary' || finalVariant === 'ghost'
-      ? colors.foreground
-      : finalVariant === 'destructive'
-        ? colors.destructive
-        : finalVariant === 'link'
-          ? colors.primary
-          : finalVariant === 'success'
-            ? colors.successForeground
-            : colors.primaryForeground;
-
   return (
     <Pressable
-      className={cn('flex-row items-center justify-center gap-2', sizeStyles[size], finalVariant === 'link' && 'px-0', isDisabled && 'opacity-50', className)}
-      style={({ pressed }) => [variantStyle, typeof style === 'function' ? style({ pressed }) : style, pressed && !isDisabled ? { opacity: 0.88 } : null]}
+      className={cn(
+        'flex-row items-center justify-center gap-2 shadow-xs',
+        variantStyles[finalVariant],
+        sizeStyles[size],
+        isDisabled && 'opacity-50',
+        className
+      )}
       accessibilityRole="button"
       disabled={isDisabled}
       {...props}
     >
-      {isLoading ? <ActivityIndicator size="small" color={textColor} /> : leftIcon}
+      {isLoading ? (
+        <ActivityIndicator size="small" color={finalVariant === 'outline' || finalVariant === 'secondary' || finalVariant === 'ghost' || finalVariant === 'link' ? '#1f2937' : '#fcfdff'} />
+      ) : (
+        leftIcon
+      )}
       {typeof children === 'string' ? (
-        <Text className={cn('text-sm font-medium', finalVariant === 'link' && 'underline', textClassName)} style={{ color: textColor }}>
-          {isSuccess ? `✓ ${children}` : children}
+        <Text className={cn('text-sm font-medium', textVariantStyles[finalVariant], textClassName)}>
+          {isSuccess ? `${children}` : children}
         </Text>
       ) : children ? (
         <View className="flex-row items-center gap-2">
-          {isSuccess ? <Text className="text-sm font-medium" style={{ color: textColor }}>✓</Text> : null}
+          {isSuccess ? <Text className={cn('text-sm font-medium', textVariantStyles[finalVariant])}>✓</Text> : null}
           {children}
         </View>
       ) : null}
