@@ -1,10 +1,7 @@
 import { Stack } from "expo-router";
-// import { useEffect } from "react";
-// import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { QueryProvider } from "@/components/providers/query-provider";
-// import { useAuth } from "@/lib/hooks/use-auth";
 import "../global.css"
 import { AuthProvider } from "@/components/providers/auth-provider";
 
@@ -46,6 +43,7 @@ export default function RootLayout() {
       <AuthProvider>
         <QueryProvider>
           <AppRouter />
+          {/* <ReactQueryDevtools /> */}
         </QueryProvider>
       </AuthProvider>
     </GestureHandlerRootView>

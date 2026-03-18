@@ -73,14 +73,7 @@ export default function HomeScreen() {
 
         <CardContent className="gap-5">
           <FieldGroup>
-            <Field>
-              <FieldContent>
-                <FieldLabel>Email</FieldLabel>
-                <Input value={email} onChangeText={setEmail} autoCapitalize="none" />
-                <FieldDescription>Use the same API shape you expect from shadcn-style form primitives.</FieldDescription>
-              </FieldContent>
-            </Field>
-
+            <Input value={email} onChangeText={setEmail} autoCapitalize="none" />
             <Field>
               <FieldContent>
                 <FieldLabel>Search</FieldLabel>
@@ -98,7 +91,7 @@ export default function HomeScreen() {
               <FieldContent>
                 <FieldLabel>Input OTP</FieldLabel>
                 <InputOTP value={otp} onChange={setOtp} maxLength={6} />
-                <FieldError errors={otp.length > 0 && otp.length < 6 ? [{ message: 'Enter the full 6-digit verification code.' }] : undefined} />
+                {/* <FieldError errors={otp.length > 0 && otp.length < 6 ? [{ message: 'Enter the full 6-digit verification code.' }] : undefined} /> */}
               </FieldContent>
             </Field>
           </FieldGroup>
