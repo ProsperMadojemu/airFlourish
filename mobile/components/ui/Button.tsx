@@ -85,7 +85,7 @@ export function Button({
       )}
       {typeof children === 'string' ? (
         <Text className={cn('text-sm font-medium', textVariantStyles[finalVariant], textClassName)}>
-          {isSuccess ? `✓ ${children}` : children}
+          {isSuccess ? `${children}` : children}
         </Text>
       ) : children ? (
         <View className="flex-row items-center gap-2">

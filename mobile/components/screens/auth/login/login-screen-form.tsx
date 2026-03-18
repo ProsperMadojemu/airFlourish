@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/Input";
 import { useLoginMutation } from "@/lib/hooks/auth/use-login-mutation";
 import { LoginSchema, loginSchema } from "@/lib/validators/auth";
 import { useRouter } from "expo-router";
+import { Button } from "@/components/ui";
 
 export function LoginScreenForm() {
     const loginMutation = useLoginMutation();
@@ -35,44 +36,46 @@ export function LoginScreenForm() {
 
     return (
         <View>
-            <Controller
-                control={control}
-                render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                        placeholder="Email"
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                    />
-                )}
-                name="email"
-            />
-            <Controller
-                control={control}
-                render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                        placeholder="Password"
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                        secureTextEntry
-                    />
-                )}
-                name="password"
-            />
-
-            <PressableOpacity
+            <View className="gap-2">
+                <Controller
+                    control={control}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <Input
+                            placeholder="Email"
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            value={value}
+                        />
+                    )}
+                    name="email"
+                />
+                <Controller
+                    control={control}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <Input
+                            placeholder="Password"
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            value={value}
+                            secureTextEntry
+                        />
+                    )}
+                    name="password"
+                />
+            </View>
+            <Button
                 onPress={handleSubmit(onSubmit)}
-                className="bg-blue-600 p-4 rounded-2xl mt-4"
+                className="rounded-2xl mt-4"
+                variant="default"
             >
-                {loginMutation.isPending ? (
+                {/* {loginMutation.isPending ? (
                     <ActivityIndicator color="white" />
-                ) : (
-                    <Text className="text-center font-semibold w-full text-lg">
-                        Login
-                    </Text>
-                )}
-            </PressableOpacity>
+                ) : ( */}
+                <Text className="text-center font-semibold w-full text-white">
+                    Login
+                </Text>
+            </Button>
+
         </View>
     )
 }
