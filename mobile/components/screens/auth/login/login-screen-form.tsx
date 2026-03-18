@@ -2,7 +2,7 @@ import { PressableOpacity } from "@/components/ui/pressable-opacity";
 import { ActivityIndicator, Text, View } from "react-native";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import Input from "@/components/ui/Input";
+import { Input } from "@/components/ui/Input";
 import { useLoginMutation } from "@/lib/hooks/auth/use-login-mutation";
 import { LoginSchema, loginSchema } from "@/lib/validators/auth";
 import { useRouter } from "expo-router";
