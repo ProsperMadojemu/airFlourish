@@ -11,9 +11,11 @@ import { countries } from '@/lib/constants/countries';
 import { useRegisterMutation } from '@/lib/hooks/auth/use-register-mutation';
 import { getRequestErrorMessage } from '@/lib/utils/get-request-error-message';
 import { RegisterSchema, registerSchema } from '@/lib/validators/auth';
+import { useLoginMutation } from '@/lib/hooks/auth/use-login-mutation';
 
 export function RegisterScreenForm() {
   const registerMutation = useRegisterMutation();
+  const loginMutation = useLoginMutation();
   const router = useRouter();
   const { colors, isDark } = useThemeTokens();
   const [showPassword, setShowPassword] = useState(false);
@@ -442,8 +444,9 @@ export function RegisterScreenForm() {
         className="mt-7 h-14 w-full rounded-2xl"
         textClassName="text-base font-semibold"
         variant="default"
-        isLoading={registerMutation.isPending}
-        disabled={registerMutation.isPending}
+        isLoading={registerMutation.isPending || loginMutation.isPending}
+        disabled={registerMutation.isPending || loginMutation.isPending}
+        isSuccess={registerMutation.isSuccess || loginMutation.isSuccess}
         style={{
           shadowColor: colors.primary,
           shadowOpacity: isDark ? 0.28 : 0.18,
@@ -452,7 +455,7 @@ export function RegisterScreenForm() {
           elevation: 6,
         }}
       >
-        Sign Up
+        {registerMutation.isPending ? "Creating account..." : loginMutation.isPending ? "Logging in..." : "SignUp"}
       </Button>
 
       <View className="mt-7 flex-row items-center justify-center gap-1.5">
