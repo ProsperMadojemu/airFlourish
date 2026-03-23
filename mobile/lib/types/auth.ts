@@ -19,5 +19,9 @@ export type RegisterPayload = {
   password: string;
   first_name?: string;
   last_name?: string;
+  phone_number?: string | null;
+  country: string;
+  church?: string | null;
+  zone?: string | null;
   user_type?: string;
 };

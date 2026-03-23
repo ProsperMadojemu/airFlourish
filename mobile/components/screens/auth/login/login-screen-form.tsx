@@ -5,39 +5,10 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, Text, View } from 'react-native';
 import { PressableOpacity } from "pressto"
-import { Button, Input, useThemeTokens } from '@/components/ui';
+import { Button, FormAlert, Input, useThemeTokens } from '@/components/ui';
 import { useLoginMutation } from '@/lib/hooks/auth/use-login-mutation';
+import { getRequestErrorMessage } from '@/lib/utils/get-request-error-message';
 import { LoginSchema, loginSchema } from '@/lib/validators/auth';
-
-function getLoginErrorMessage(error: unknown) {
-  const fallbackMessage = 'Unable to sign in right now. Please check your details and try again.';
-
-  if (typeof error !== 'object' || error === null) {
-    return fallbackMessage;
-  }
-
-  const responseData = (error as {
-    response?: {
-      data?: {
-        detail?: unknown;
-        message?: unknown;
-      };
-    };
-    message?: unknown;
-  }).response?.data;
-
-  if (typeof responseData?.detail === 'string') {
-    return responseData.detail;
-  }
-
-  if (typeof responseData?.message === 'string') {
-    return responseData.message;
-  }
-
-  const errorMessage = (error as { message?: unknown }).message;
-
-  return typeof errorMessage === 'string' ? errorMessage : fallbackMessage;
-}
 
 // type SocialButtonProps = {
 //   icon: React.ReactNode;
@@ -113,7 +84,11 @@ export function LoginScreenForm() {
       router.replace('/(protected)/(tabs)');
       reset();
     } catch (error) {
-      setAuthError(getLoginErrorMessage(error));
+      setAuthError(
+        getRequestErrorMessage(error, {
+          fallbackMessage: 'Unable to sign in right now. Please check your details and try again.',
+        })
+      );
     }
   };
 
@@ -138,20 +113,7 @@ export function LoginScreenForm() {
         Sign in to continue your journey
       </Text>
 
-      {authError ? (
-        <View
-          className="mt-5 rounded-2xl px-4 py-3"
-          style={{
-            backgroundColor: isDark ? 'rgba(248, 113, 113, 0.12)' : '#fff1f2',
-            borderColor: isDark ? 'rgba(248, 113, 113, 0.18)' : '#fecdd3',
-            borderWidth: 1,
-          }}
-        >
-          <Text className="text-sm" style={{ color: colors.destructive }}>
-            {authError}
-          </Text>
-        </View>
-      ) : null}
+      <FormAlert message={authError} />
 
       <View className="mt-7 gap-5">
         <Controller

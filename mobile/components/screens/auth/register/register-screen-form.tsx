@@ -1,54 +1,16 @@
 import { Feather } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, Text, View } from 'react-native';
 
-import { Button, Input, useThemeTokens } from '@/components/ui';
+import { Button, FormAlert, Input, SelectField, useThemeTokens } from '@/components/ui';
 import { PressableOpacity } from '@/components/ui/pressable-opacity';
+import { countries } from '@/lib/constants/countries';
 import { useRegisterMutation } from '@/lib/hooks/auth/use-register-mutation';
+import { getRequestErrorMessage } from '@/lib/utils/get-request-error-message';
 import { RegisterSchema, registerSchema } from '@/lib/validators/auth';
-
-function getRegisterErrorMessage(error: unknown) {
-  const fallbackMessage = 'Unable to create your account right now. Please try again in a moment.';
-
-  if (typeof error !== 'object' || error === null) {
-    return fallbackMessage;
-  }
-
-  const responseData = (error as {
-    response?: {
-      data?: {
-        detail?: unknown;
-        message?: unknown;
-        email?: unknown;
-        password?: unknown;
-      };
-    };
-    message?: unknown;
-  }).response?.data;
-
-  if (typeof responseData?.detail === 'string') {
-    return responseData.detail;
-  }
-
-  if (typeof responseData?.message === 'string') {
-    return responseData.message;
-  }
-
-  if (Array.isArray(responseData?.email) && typeof responseData.email[0] === 'string') {
-    return responseData.email[0];
-  }
-
-  if (Array.isArray(responseData?.password) && typeof responseData.password[0] === 'string') {
-    return responseData.password[0];
-  }
-
-  const errorMessage = (error as { message?: unknown }).message;
-
-  return typeof errorMessage === 'string' ? errorMessage : fallbackMessage;
-}
 
 export function RegisterScreenForm() {
   const registerMutation = useRegisterMutation();
@@ -63,6 +25,10 @@ export function RegisterScreenForm() {
   const fieldBackground = isDark ? '#111c2d' : '#ffffff';
   const fieldBorder = isDark ? '#22304a' : '#d9dee9';
   const iconColor = isDark ? '#94a3b8' : '#6b7280';
+  const countryOptions = useMemo(
+    () => countries.countries.map((country) => ({ label: country.name, value: country.code })),
+    []
+  );
 
   const {
     reset,
@@ -76,6 +42,10 @@ export function RegisterScreenForm() {
       last_name: '',
       email: '',
       password: '',
+      phone_number: '',
+      country: '',
+      church: '',
+      zone: '',
       confirmPassword: '',
     },
     resolver: zodResolver(registerSchema),
@@ -88,16 +58,27 @@ export function RegisterScreenForm() {
 
     try {
       await registerMutation.mutateAsync({
-        first_name: values.first_name,
-        last_name: values.last_name || '',
+        first_name: values.first_name || undefined,
+        last_name: values.last_name || undefined,
         email: values.email,
         password: values.password,
+        phone_number: values.phone_number || null,
+        country: values.country,
+        church: values.church || null,
+        zone: values.zone || null,
         user_type: 'regular',
       });
       reset();
       router.replace('/(public)/(auth)/login');
     } catch (error) {
-      setAuthError(getRegisterErrorMessage(error));
+      console.error('Register error:', error);
+
+      setAuthError(
+        getRequestErrorMessage(error, {
+          fallbackMessage: 'Unable to create your account right now. Please try again in a moment.',
+          preferredKeys: ['email', 'password', 'country', 'phone_number', 'church', 'zone', 'first_name', 'last_name'],
+        })
+      );
     }
   };
 
@@ -122,20 +103,7 @@ export function RegisterScreenForm() {
         Sign up to start your AirFlourish journey
       </Text>
 
-      {authError ? (
-        <View
-          className="mt-5 rounded-2xl px-4 py-3"
-          style={{
-            backgroundColor: isDark ? 'rgba(248, 113, 113, 0.12)' : '#fff1f2',
-            borderColor: isDark ? 'rgba(248, 113, 113, 0.18)' : '#fecdd3',
-            borderWidth: 1,
-          }}
-        >
-          <Text className="text-sm" style={{ color: colors.destructive }}>
-            {authError}
-          </Text>
-        </View>
-      ) : null}
+      <FormAlert message={authError} />
 
       <View className="mt-7 gap-5">
         <Controller
@@ -236,6 +204,132 @@ export function RegisterScreenForm() {
               inputContainerStyle={{
                 backgroundColor: fieldBackground,
                 borderColor: errors.email ? colors.destructive : fieldBorder,
+              }}
+              className="h-14 text-base"
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="phone_number"
+          render={({ field: { onChange, value } }) => (
+            <Input
+              editable={!registerMutation.isPending}
+              label="Phone Number"
+              placeholder="Enter your phone number"
+              onChangeText={(text) => {
+                setAuthError(null);
+                clearErrors('phone_number');
+                onChange(text);
+              }}
+              value={value}
+              error={errors.phone_number?.message}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="tel"
+              keyboardType="phone-pad"
+              textContentType="telephoneNumber"
+              keyboardAppearance={isDark ? 'dark' : 'light'}
+              returnKeyType="next"
+              selectionColor={colors.primary}
+              cursorColor={colors.primary}
+              leftIcon={<Feather name="phone" size={18} color={iconColor} />}
+              inputContainerClassName="min-h-14 rounded-2xl px-4"
+              inputContainerStyle={{
+                backgroundColor: fieldBackground,
+                borderColor: errors.phone_number ? colors.destructive : fieldBorder,
+              }}
+              className="h-14 text-base"
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="country"
+          render={({ field: { onChange, value } }) => (
+            <SelectField
+              disabled={registerMutation.isPending}
+              label="Country"
+              placeholder="Select your country"
+              value={value}
+              options={countryOptions}
+              error={errors.country?.message}
+              searchable
+              title="Select your country"
+              description="Choose the country linked to your account."
+              searchPlaceholder="Search countries"
+              leftIcon={<Feather name="map-pin" size={18} color={iconColor} />}
+              onValueChange={(selectedValue) => {
+                setAuthError(null);
+                clearErrors('country');
+                onChange(selectedValue);
+              }}
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="church"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              editable={!registerMutation.isPending}
+              label="Church"
+              placeholder="Enter your church"
+              onBlur={onBlur}
+              onChangeText={(text) => {
+                setAuthError(null);
+                clearErrors('church');
+                onChange(text);
+              }}
+              value={value}
+              error={errors.church?.message}
+              autoCapitalize="words"
+              autoCorrect={false}
+              keyboardAppearance={isDark ? 'dark' : 'light'}
+              returnKeyType="next"
+              selectionColor={colors.primary}
+              cursorColor={colors.primary}
+              leftIcon={<Feather name="home" size={18} color={iconColor} />}
+              inputContainerClassName="min-h-14 rounded-2xl px-4"
+              inputContainerStyle={{
+                backgroundColor: fieldBackground,
+                borderColor: errors.church ? colors.destructive : fieldBorder,
+              }}
+              className="h-14 text-base"
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="zone"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              editable={!registerMutation.isPending}
+              label="Zone"
+              placeholder="Enter your zone"
+              onBlur={onBlur}
+              onChangeText={(text) => {
+                setAuthError(null);
+                clearErrors('zone');
+                onChange(text);
+              }}
+              value={value}
+              error={errors.zone?.message}
+              autoCapitalize="words"
+              autoCorrect={false}
+              keyboardAppearance={isDark ? 'dark' : 'light'}
+              returnKeyType="next"
+              selectionColor={colors.primary}
+              cursorColor={colors.primary}
+              leftIcon={<Feather name="grid" size={18} color={iconColor} />}
+              inputContainerClassName="min-h-14 rounded-2xl px-4"
+              inputContainerStyle={{
+                backgroundColor: fieldBackground,
+                borderColor: errors.zone ? colors.destructive : fieldBorder,
               }}
               className="h-14 text-base"
             />
