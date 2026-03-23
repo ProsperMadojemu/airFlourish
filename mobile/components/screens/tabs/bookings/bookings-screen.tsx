@@ -3,7 +3,7 @@ import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import type { Booking } from "@/lib/types/bookings";
 import { useBookingsQuery } from "@/lib/hooks/bookings/use-bookings-query";
 
-export default function TabBookingsScreen() {
+export function TabBookingsScreen() {
   const { data: bookings = [], isLoading, error } = useBookingsQuery();
 
   if (isLoading) {
