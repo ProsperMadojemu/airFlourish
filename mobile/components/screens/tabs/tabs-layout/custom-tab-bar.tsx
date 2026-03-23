@@ -13,7 +13,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
   const { inactiveIconColor, inactiveLabelColor } = getInactiveTabColors(isDark);
 
   return (
-    <View style={styles.tabBarOuter} pointerEvents="box-none">
+    <View style={[styles.tabBarOuter, {backgroundColor: colors.background}]} pointerEvents="box-none">
       <TabBarShell
         backgroundColor={colors.background}
         borderColor={colors.border}

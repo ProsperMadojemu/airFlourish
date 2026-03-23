@@ -104,7 +104,7 @@ export function FloatingTabButton({
 
   const animatedIndicatorStyle = useAnimatedStyle(() => ({
     width: interpolate(progress.value, [0, 1], [6, 22], Extrapolation.CLAMP),
-    opacity: interpolate(progress.value, [0, 1], [0.16, 1]),
+    opacity: interpolate(progress.value, [0, 1], [0.16, 0.5]),
     backgroundColor: interpolateColor(progress.value, [0, 1], [inactiveLabelColor, activeLabelColor]),
   }));
 
