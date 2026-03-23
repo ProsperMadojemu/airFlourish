@@ -1,7 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
-import { DrawerActions } from '@react-navigation/native';
 import { Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
 
 import { useThemeTokens } from '@/components/ui/theme';
 
@@ -14,21 +11,8 @@ export function BottomTabs() {
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={({ navigation }) => ({
-        // headerShown: false,
-        headerLeft: () => (
-          <Pressable style={{ marginLeft: 15 }} onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}>
-            <Ionicons name="menu" size={28} color={colors.foreground} />
-          </Pressable>
-        ),
-        headerShadowVisible: false,
-        headerStyle: {
-          backgroundColor: colors.background,
-        },
-        headerStatusBarHeight: 0,
-        headerTitleStyle: {
-          color: colors.foreground,
-        },
+      screenOptions={() => ({
+        headerShown: false,
         sceneStyle: {
           backgroundColor: colors.background,
         },
