@@ -2,7 +2,6 @@ import { Text, View, ScrollView } from 'react-native';
 
 import type { HomeDeal } from './data';
 import { PlaceholderImageCard } from './placeholder-image-card';
-import { LinearGradient } from "expo-linear-gradient"
 
 type PromoDealsSectionProps = {
   deals: HomeDeal[];
