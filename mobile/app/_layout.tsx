@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { KeyboardProvider } from "react-native-keyboard-controller"
 import { QueryProvider } from "@/components/providers/query-provider";
 import "../global.css"
 import { AuthProvider } from "@/components/providers/auth-provider";
@@ -42,7 +42,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
         <QueryProvider>
-          <AppRouter />
+          <KeyboardProvider>
+            <AppRouter />
+          </KeyboardProvider>
           {/* <ReactQueryDevtools /> */}
         </QueryProvider>
       </AuthProvider>

@@ -4,16 +4,14 @@ import { StatusBar } from 'expo-status-bar';
 import {
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Text,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Logo } from '@/components/logo';
 import { useThemeTokens } from '@/components/ui';
-import { dismissKeyboard } from '@/lib/keyboard_events';
+import { KeyboardAwareScrollView, KeyboardGestureArea, KeyboardToolbar } from 'react-native-keyboard-controller';
 
 type AuthScreenShellProps = {
   children: ReactNode;
@@ -35,15 +33,14 @@ export function AuthScreenShell({
   const decorationSecondary = isDark ? 'rgba(15, 23, 42, 0.18)' : 'rgba(127, 29, 29, 0.12)';
 
   return (
-    <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: pageBackground }}>
-        <StatusBar style="light" backgroundColor={heroBackground} />
-
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <ScrollView
+    <SafeAreaView style={{ flex: 1, backgroundColor: pageBackground }}>
+      <StatusBar style="auto" />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <KeyboardGestureArea>
+          <KeyboardAwareScrollView
             bounces={false}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ flexGrow: 1 }}
@@ -95,9 +92,10 @@ export function AuthScreenShell({
                 {children}
               </View>
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+          </KeyboardAwareScrollView>
+        </KeyboardGestureArea>
+      </KeyboardAvoidingView>
+      {/* <KeyboardToolbar /> */}
+    </SafeAreaView>
   );
 }
