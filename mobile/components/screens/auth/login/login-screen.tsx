@@ -1,106 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
-import { StatusBar } from 'expo-status-bar';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { Logo } from '@/components/logo';
-import { useThemeTokens } from '@/components/ui';
-import { dismissKeyboard } from '@/lib/keyboard_events';
+import { AuthScreenShell } from '@/components/screens/auth/auth-screen-shell';
 
 import { LoginScreenForm } from './login-screen-form';
 
 export function LoginScreen() {
-  const { colors, isDark } = useThemeTokens();
-
-  const pageBackground = isDark ? '#070d18' : '#f6f7fb';
-  const heroBackground = isDark ? '#8f1d24' : colors.primary;
-  const heroCardBackground = isDark ? 'rgba(15, 23, 42, 0.72)' : 'rgba(255, 255, 255, 0.94)';
-  const heroCardBorder = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.42)';
-  const heroCaptionColor = isDark ? '#fecdd3' : '#991b1b';
-  const decorationPrimary = isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(255, 255, 255, 0.16)';
-  const decorationSecondary = isDark ? 'rgba(15, 23, 42, 0.18)' : 'rgba(127, 29, 29, 0.12)';
-
   return (
-    <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: pageBackground }}>
-        <StatusBar style="light" backgroundColor={heroBackground} />
-
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <ScrollView
-            bounces={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ flexGrow: 1 }}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={{ flex: 1, backgroundColor: pageBackground }}>
-              <View
-                className="overflow-hidden px-6 pb-20 pt-4"
-                style={{
-                  backgroundColor: heroBackground,
-                  borderBottomLeftRadius: 40,
-                  borderBottomRightRadius: 40,
-                }}
-              >
-                <View
-                  className="absolute -left-20 top-8 h-56 w-56 rounded-full"
-                  style={{ backgroundColor: decorationPrimary }}
-                />
-                <View
-                  className="absolute -right-24 top-20 h-72 w-72 rounded-full"
-                  style={{ backgroundColor: decorationSecondary }}
-                />
-                <View
-                  className="absolute bottom-0 left-10 h-36 w-36 rounded-full"
-                  style={{ backgroundColor: decorationSecondary }}
-                />
-
-                <View className="items-center pt-8">
-                  {/* <View
-                    className="h-16 w-16 items-center justify-center rounded-full border"
-                    style={{
-                      backgroundColor: decorationPrimary,
-                      borderColor: heroCardBorder,
-                    }}
-                  >
-                    <Ionicons name="airplane-outline" size={30} color="#ffffff" />
-                  </View> */}
-
-                  <View
-                    className="mt-5 w-full items-center rounded-[28px] px-6 py-6"
-                    style={{
-                      backgroundColor: heroCardBackground,
-                      borderColor: heroCardBorder,
-                      borderWidth: 1,
-                    }}
-                  >
-                    <Logo width={170} accessibilityLabel="AirFlourish logo" />
-                    <Text
-                      className="mt-4 text-center text-base font-semibold"
-                      style={{ color: heroCaptionColor }}
-                    >
-                      Your Journey Begins Here
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              <View className="px-6 pb-10" style={{ marginTop: -42 }}>
-                <LoginScreenForm />
-              </View>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+    <AuthScreenShell>
+      <LoginScreenForm />
+    </AuthScreenShell>
   );
 }
