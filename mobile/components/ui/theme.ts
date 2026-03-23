@@ -4,9 +4,9 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const shadcnTheme = {
   light: {
-    background: '#f6f7fb',
+    background: '#ffffff',
     foreground: '#1f2937',
-    card: '#ffffff',
+    card: '#f6f7fb',
     cardForeground: '#1f2937',
     popover: '#ffffff',
     popoverForeground: '#1f2937',
