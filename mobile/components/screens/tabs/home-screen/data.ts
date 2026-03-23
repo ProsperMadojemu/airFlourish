@@ -1,6 +1,7 @@
 import type { ComponentProps } from 'react';
 
 import type { Ionicons } from '@expo/vector-icons';
+import { ExternalPathString, RelativePathString } from 'expo-router';
 
 export type HomeDeal = {
   id: string;
@@ -14,6 +15,7 @@ export type HomeDeal = {
 export type QuickAction = {
   id: string;
   label: string;
+  href: RelativePathString | ExternalPathString;
   icon: ComponentProps<typeof Ionicons>['name'];
 };
 
@@ -53,10 +55,10 @@ export const PROMO_DEALS: HomeDeal[] = [
 ];
 
 export const QUICK_ACTIONS: QuickAction[] = [
-  { id: 'flights', label: 'Flights', icon: 'airplane-outline' },
-  { id: 'hotels', label: 'Hotels', icon: 'business-outline' },
-  { id: 'transport', label: 'Transport', icon: 'car-outline' },
-  { id: 'visa', label: 'Visa', icon: 'document-text-outline' },
+  { id: 'flights', label: 'Flights', icon: 'airplane-outline', href: "../flights" },
+  { id: 'hotels', label: 'Hotels', icon: 'business-outline', href: "../hotels" },
+  { id: 'transport', label: 'Transport', icon: 'car-outline', href: "../transport" },
+  { id: 'visa', label: 'Visa', icon: 'document-text-outline', href: "../visa" },
 ];
 
 export const DESTINATIONS: Destination[] = [
