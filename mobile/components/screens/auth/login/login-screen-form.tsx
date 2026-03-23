@@ -8,6 +8,7 @@ import { Button, FormAlert, Input, useThemeTokens } from '@/components/ui';
 import { useLoginMutation } from '@/lib/hooks/auth/use-login-mutation';
 import { getRequestErrorMessage } from '@/lib/utils/get-request-error-message';
 import { LoginSchema, loginSchema } from '@/lib/validators/auth';
+import { Link } from 'expo-router';
 
 // type SocialButtonProps = {
 //   icon: React.ReactNode;
