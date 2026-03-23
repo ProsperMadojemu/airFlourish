@@ -1,6 +1,5 @@
 
 // import { useAuth } from "@/hooks/useAuth";
-import { ThemedView } from "@/components/themes/themed-view";
 import { useThemeTokens } from "@/components/ui";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { Redirect, Stack } from "expo-router";
