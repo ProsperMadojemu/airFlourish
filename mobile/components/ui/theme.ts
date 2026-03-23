@@ -4,7 +4,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const shadcnTheme = {
   light: {
-    background: '#ffffff',
+    background: '#f6f7fb',
     foreground: '#1f2937',
     card: '#ffffff',
     cardForeground: '#1f2937',

@@ -15,6 +15,7 @@ export function BottomTabs() {
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={({ navigation }) => ({
+        // headerShown: false,
         headerLeft: () => (
           <Pressable style={{ marginLeft: 15 }} onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}>
             <Ionicons name="menu" size={28} color={colors.foreground} />
@@ -24,6 +25,7 @@ export function BottomTabs() {
         headerStyle: {
           backgroundColor: colors.background,
         },
+        headerStatusBarHeight: 0,
         headerTitleStyle: {
           color: colors.foreground,
         },
