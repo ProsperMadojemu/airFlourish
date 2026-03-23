@@ -1,6 +1,5 @@
 import { Feather } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, Text, View } from 'react-native';
@@ -45,7 +44,6 @@ import { LoginSchema, loginSchema } from '@/lib/validators/auth';
 
 export function LoginScreenForm() {
   const loginMutation = useLoginMutation();
-  const router = useRouter();
   const { colors, isDark } = useThemeTokens();
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -81,7 +79,7 @@ export function LoginScreenForm() {
 
     try {
       await loginMutation.mutateAsync(values);
-      router.replace('/(protected)/(tabs)');
+      // router.replace('/(protected)/(tabs)');
       reset();
     } catch (error) {
       setAuthError(
