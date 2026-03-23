@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "app.visas",
     "app.payments",
     "app.transport",
+    "app.rentals",
     "app.notifications",
     "app.transactions",
     "app.wallets",
@@ -111,6 +112,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    "DEFAULT_PAGINATION_CLASS": "app.core.pagination.DefaultPagination",
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
@@ -119,6 +121,9 @@ REST_FRAMEWORK = {
         "anon": "20/minute",
         "user": "100/minute",
         "ip": "30/minute",
+        "login": "5/minute",
+        "payment": "30/minute",
+        "booking": "20/minute",
         "hotel_search": "10/minute",
         "flight_search": "10/minute",
     }
@@ -171,6 +176,22 @@ AMADEUS_API_SECRET = os.getenv("AMADEUS_API_SECRET")
 BOOKING_RAPIDAPI_KEY = os.getenv("BOOKING_RAPIDAPI_KEY")
 BOOKING_RAPIDAPI_HOST = os.getenv("BOOKING_RAPIDAPI_HOST")
 
+# Currency settings
+# Map country codes to preferred display/charge currency.
+COUNTRY_CURRENCY_MAP = {
+    "NG": "NGN",
+}
+# Flutterwave bank transfer support is currency-limited (e.g., NGN/GHS).
+BANK_TRANSFER_SUPPORTED_CURRENCIES = ["NGN", "GHS"]
+
+# Cache settings (flight search/payment context)
+FLIGHT_OFFER_CACHE_TTL = 60 * 60  # 1 hour
+FLIGHT_PAYMENT_CONTEXT_TTL = 6 * 60 * 60  # 6 hours
+
+# Idempotency + hotel reservation holds
+IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
+HOTEL_RESERVATION_HOLD_MINUTES = 30
+
 # Celery
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -178,6 +199,12 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 CELERY_TIMEZONE = "Africa/Lagos"
+CELERY_BEAT_SCHEDULE = {
+    "expire-hotel-reservation-holds": {
+        "task": "app.hotels.tasks.expire_hotel_reservation_holds",
+        "schedule": 300.0,
+    }
+}
 
 RECAPTCHA_SECRET_KEY = ""
 

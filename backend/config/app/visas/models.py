@@ -1,45 +1,198 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from app.bookings.models import Booking
-from app.flights.models import FlightBooking
+from app.visas.constants import get_default_documents
+
+
+class VisaType(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=100)
+    country = models.CharField(max_length=2, blank=True)
+    description = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    required_documents = models.JSONField(default=list, blank=True)
+    processing_days = models.PositiveIntegerField(default=7)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["country", "is_active"])]
+
+    def save(self, *args, **kwargs):
+        if not self.required_documents:
+            defaults = get_default_documents(self.country, self.name or self.code)
+            if defaults:
+                self.required_documents = defaults
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} ({self.code})"
+
 
 class VisaApplication(models.Model):
+    STATUS_DRAFT = "draft"
+    STATUS_INCOMPLETE = "incomplete"
+    STATUS_READY_FOR_SUBMISSION = "ready_for_submission"
+    STATUS_READY_FOR_PAYMENT = "ready_for_payment"
+    STATUS_PAID = "paid"
+    STATUS_SUBMITTED = "submitted"
+    STATUS_UNDER_REVIEW = "under_review"
+    STATUS_UNDER_EMBASSY_REVIEW = "under_embassy_review"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+    EMBASSY_REVIEW_PENDING = "pending"
+    EMBASSY_REVIEW_IN_REVIEW = "in_review"
+
     STATUS_CHOICES = (
-        ("pending", "Pending submission"),           # User just created
-        ("verified", "Documents verified"),          # Admin checked docs
-        ("submitted", "Submitted to embassy"),      # Sent to embassy
-        ("approved", "Approved by embassy"),        # Visa issued
-        ("rejected", "Rejected by embassy"),        # Visa rejected
+        (STATUS_DRAFT, "Draft"),
+        (STATUS_INCOMPLETE, "Incomplete"),
+        (STATUS_READY_FOR_SUBMISSION, "Ready for submission"),
+        (STATUS_READY_FOR_PAYMENT, "Ready for payment"),
+        (STATUS_PAID, "Paid"),
+        (STATUS_SUBMITTED, "Submitted"),
+        (STATUS_UNDER_REVIEW, "Under review"),
+        (STATUS_UNDER_EMBASSY_REVIEW, "Under embassy review"),
+        (STATUS_APPROVED, "Approved"),
+        (STATUS_REJECTED, "Rejected"),
     )
 
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
-    flight = models.ForeignKey(
-        FlightBooking,
+    ALLOWED_TRANSITIONS = {
+        STATUS_DRAFT: {STATUS_INCOMPLETE, STATUS_READY_FOR_SUBMISSION, STATUS_READY_FOR_PAYMENT},
+        STATUS_INCOMPLETE: {STATUS_READY_FOR_SUBMISSION, STATUS_READY_FOR_PAYMENT},
+        STATUS_READY_FOR_SUBMISSION: {STATUS_SUBMITTED},
+        STATUS_READY_FOR_PAYMENT: {STATUS_PAID},
+        STATUS_PAID: {STATUS_SUBMITTED},
+        STATUS_SUBMITTED: {STATUS_UNDER_EMBASSY_REVIEW, STATUS_UNDER_REVIEW},
+        STATUS_UNDER_REVIEW: {STATUS_APPROVED, STATUS_REJECTED},
+        STATUS_UNDER_EMBASSY_REVIEW: {STATUS_APPROVED, STATUS_REJECTED},
+        STATUS_APPROVED: set(),
+        STATUS_REJECTED: set(),
+    }
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="visa_applications",
+    )
+    agent = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        help_text="Linked flight booking (optional)",
+        related_name="agent_visa_applications",
     )
-    destination_country = models.CharField(max_length=100)
-    visa_type = models.CharField(max_length=100)
-    appointment_date = models.DateField(null=True, blank=True)
-    document_status = models.CharField(
-        max_length=50, default="pending")
+    booking = models.OneToOneField(
+        Booking,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="visa_application",
+    )
+    visa_type = models.ForeignKey(
+        VisaType,
+        on_delete=models.PROTECT,
+        related_name="applications",
+        null=True,
+        blank=True,
+    )
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="pending"
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_DRAFT,
     )
-
-    # Documents uploads
-    passport_scan = models.FileField(upload_to="visa_documents/passports/", null=True, blank=True)
-    photo = models.ImageField(upload_to="visa_documents/photos/", null=True, blank=True)
-    supporting_docs = models.FileField(upload_to="visa_documents/supporting/", null=True, blank=True)
-
+    embassy_review_status = models.CharField(
+        max_length=50, blank=True, default=EMBASSY_REVIEW_PENDING
+    )
+    internal_notes = models.TextField(blank=True)
+    is_locked = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # Track admin action timestamps
-    reviewed_at = models.DateTimeField(null=True, blank=True)
-    approved_at = models.DateTimeField(null=True, blank=True)
-    rejected_at = models.DateTimeField(null=True, blank=True)
+    def transition_to(self, new_status):
+        allowed = self.ALLOWED_TRANSITIONS.get(self.status, set())
+        if new_status not in allowed:
+            raise ValidationError(
+                f"Cannot transition from {self.status} to {new_status}"
+            )
+        self.status = new_status
+        self.save(update_fields=["status", "updated_at"])
+
+    def lock(self):
+        if not self.is_locked:
+            self.is_locked = True
+            self.save(update_fields=["is_locked", "updated_at"])
+
+    def document_quality_errors(self, required_docs):
+        errors = {}
+        if not required_docs:
+            return errors
+        documents = list(self.documents.all())
+        for doc_type in required_docs:
+            candidates = [doc for doc in documents if doc.document_type == doc_type]
+            if not candidates:
+                continue
+            if not any(
+                getattr(doc.file, "size", 0) > 0 for doc in candidates if doc.file
+            ):
+                errors[doc_type] = "Uploaded document is empty or invalid"
+        return errors
 
     def __str__(self):
-        return f"{self.booking.user.first_name} - {self.destination_country} ({self.visa_type} ({self.status})"
+        visa_type = self.visa_type.name if self.visa_type else "unknown"
+        return f"{self.user_id} - {visa_type} ({self.status})"
+
+
+class VisaDocument(models.Model):
+    application = models.ForeignKey(
+        VisaApplication,
+        on_delete=models.CASCADE,
+        related_name="documents",
+    )
+    document_type = models.CharField(max_length=100)
+    file = models.FileField(upload_to="visa_documents/")
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.application_id} - {self.document_type}"
+
+
+class VisaPayment(models.Model):
+    STATUS_PENDING = "pending"
+    STATUS_SUCCESSFUL = "successful"
+    STATUS_FAILED = "failed"
+
+    STATUS_CHOICES = (
+        (STATUS_PENDING, "Pending"),
+        (STATUS_SUCCESSFUL, "Successful"),
+        (STATUS_FAILED, "Failed"),
+    )
+
+    application = models.ForeignKey(
+        VisaApplication,
+        on_delete=models.CASCADE,
+        related_name="payments",
+    )
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    currency = models.CharField(max_length=10)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+    )
+    idempotency_key = models.CharField(max_length=255, unique=True)
+    tx_ref = models.CharField(max_length=100)
+    payment_reference = models.CharField(max_length=100, blank=True)
+    payment_link = models.URLField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["tx_ref"]),
+            models.Index(fields=["status"]),
+        ]
+
+    def __str__(self):
+        return f"{self.application_id} - {self.status}"
