@@ -21,8 +21,6 @@ export const TAB_SCREENS = [
   { name: 'index', title: 'Home', icon: 'home-outline', activeIcon: 'home', label: 'Home' },
   { name: 'bookings', title: 'Bookings', icon: 'receipt-outline', activeIcon: 'receipt', label: 'Bookings' },
   { name: 'flights', title: 'Flights', icon: 'airplane-outline', activeIcon: 'airplane', label: 'Flights' },
-  { name: 'payments', title: 'Payments', icon: 'card-outline', activeIcon: 'card', label: 'Payments' },
-  { name: 'profile', title: 'Profile', icon: 'person-outline', activeIcon: 'person', label: 'Profile' },
   { name: 'settings', title: 'Settings', icon: 'options-outline', activeIcon: 'options', label: 'Settings' },
 ] as const satisfies readonly TabScreenConfig[];
 
@@ -53,6 +51,7 @@ export function getTabConfig(routeName: string): TabScreenConfig {
 
 export function isVisibleTabRoute(route: TabRoute, descriptors: BottomTabBarProps['descriptors']) {
   const options = descriptors[route.key]?.options as TabBarRouteOptions;
+  const isConfiguredTab = TAB_SCREENS.some((screen) => screen.name === route.name);
 
-  return options?.href !== null;
+  return isConfiguredTab && options?.href !== null;
 }
