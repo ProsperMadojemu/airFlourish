@@ -1,12 +1,11 @@
-import { AntDesign, Feather, FontAwesome } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, Text, View } from 'react-native';
-
+import { PressableOpacity } from "pressto"
 import { Button, Input, useThemeTokens } from '@/components/ui';
-import { PressableOpacity } from '@/components/ui/pressable-opacity';
 import { useLoginMutation } from '@/lib/hooks/auth/use-login-mutation';
 import { LoginSchema, loginSchema } from '@/lib/validators/auth';
 
@@ -40,38 +39,38 @@ function getLoginErrorMessage(error: unknown) {
   return typeof errorMessage === 'string' ? errorMessage : fallbackMessage;
 }
 
-type SocialButtonProps = {
-  icon: React.ReactNode;
-  label: string;
-  backgroundColor: string;
-  borderColor: string;
-  textColor: string;
-};
+// type SocialButtonProps = {
+//   icon: React.ReactNode;
+//   label: string;
+//   backgroundColor: string;
+//   borderColor: string;
+//   textColor: string;
+// };
 
-function SocialButton({
-  icon,
-  label,
-  backgroundColor,
-  borderColor,
-  textColor,
-}: SocialButtonProps) {
-  return (
-    <PressableOpacity
-      disabled
-      className="h-14 flex-1 flex-row items-center justify-center gap-2 rounded-2xl"
-      style={{
-        backgroundColor,
-        borderColor,
-        borderWidth: 1,
-      }}
-    >
-      {icon}
-      <Text className="text-base font-semibold" style={{ color: textColor }}>
-        {label}
-      </Text>
-    </PressableOpacity>
-  );
-}
+// function SocialButton({
+//   icon,
+//   label,
+//   backgroundColor,
+//   borderColor,
+//   textColor,
+// }: SocialButtonProps) {
+//   return (
+//     <PressableOpacity
+//       disabled
+//       className="h-14 flex-1 flex-row items-center justify-center gap-2 rounded-2xl"
+//       style={{
+//         backgroundColor,
+//         borderColor,
+//         borderWidth: 1,
+//       }}
+//     >
+//       {icon}
+//       <Text className="text-base font-semibold" style={{ color: textColor }}>
+//         {label}
+//       </Text>
+//     </PressableOpacity>
+//   );
+// }
 
 export function LoginScreenForm() {
   const loginMutation = useLoginMutation();
@@ -89,8 +88,6 @@ export function LoginScreenForm() {
   const fieldBorder = isDark ? '#22304a' : '#d9dee9';
   const dividerColor = isDark ? '#22304a' : '#dbe1ec';
   const iconColor = isDark ? '#94a3b8' : '#6b7280';
-  const socialSurface = isDark ? '#10192a' : '#ffffff';
-  const socialBorder = isDark ? '#1f2b42' : '#e5eaf3';
 
   const {
     reset,
@@ -278,7 +275,7 @@ export function LoginScreenForm() {
         <View className="h-px flex-1" style={{ backgroundColor: dividerColor }} />
       </View>
 
-      <View className="mt-5 flex-row gap-3">
+      {/* <View className="mt-5 flex-row gap-3">
         <SocialButton
           label="Google"
           backgroundColor={socialSurface}
@@ -293,7 +290,25 @@ export function LoginScreenForm() {
           textColor={colors.foreground}
           icon={<FontAwesome name="facebook" size={18} color="#1877f2" />}
         />
-      </View>
+      </View> */}
+
+      <Button
+        // onPress={handleSubmit(onSubmit)}
+        className="mt-6 h-14 w-full rounded-2xl"
+        textClassName="text-base font-semibold"
+        variant="default"
+        disabled={loginMutation.isPending}
+        style={{
+          shadowColor: colors.kingschat,
+          shadowOpacity: isDark ? 0.28 : 0.18,
+          shadowOffset: { width: 0, height: 10 },
+          backgroundColor: colors.kingschat,
+          shadowRadius: 14,
+          elevation: 6,
+        }}
+      >
+        Kingschat
+      </Button>
 
       <View className="mt-7 flex-row items-center justify-center gap-1.5">
         <Text className="text-sm" style={{ color: colors.mutedForeground }}>

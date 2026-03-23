@@ -65,7 +65,7 @@ export function LoginScreen() {
                 />
 
                 <View className="items-center pt-8">
-                  <View
+                  {/* <View
                     className="h-16 w-16 items-center justify-center rounded-full border"
                     style={{
                       backgroundColor: decorationPrimary,
@@ -73,7 +73,7 @@ export function LoginScreen() {
                     }}
                   >
                     <Ionicons name="airplane-outline" size={30} color="#ffffff" />
-                  </View>
+                  </View> */}
 
                   <View
                     className="mt-5 w-full items-center rounded-[28px] px-6 py-6"
