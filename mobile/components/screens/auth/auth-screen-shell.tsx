@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Logo } from '@/components/logo';
 import { useThemeTokens } from '@/components/ui';
-import { KeyboardAwareScrollView, KeyboardGestureArea, KeyboardToolbar } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView, KeyboardGestureArea } from 'react-native-keyboard-controller';
 
 type AuthScreenShellProps = {
   children: ReactNode;
